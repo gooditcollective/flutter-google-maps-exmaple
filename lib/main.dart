@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_google_maps_example/place_card/place_card.dart';
+import 'package:flutter_google_maps_example/utils/custom_marker_drawer.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'datasource.dart';
@@ -32,6 +33,9 @@ class _CustomMapState extends State<CustomMap> {
   static const LatLng _center = LatLng(48.864716, 2.349014);
   final Set<Marker> _markers = {};
 
+  final CustomMarkerDrawer _markerDrawer = CustomMarkerDrawer();
+  double _scale = 1;
+
   final List<Place> _places = places;
   Place? _selectedPlace;
   final List<String> _likedPlaceIds = [];
@@ -58,13 +62,15 @@ class _CustomMapState extends State<CustomMap> {
   }
 
   Future<void> _upsertMarker(Place place) async {
-    final selectedPrefix = place.id == _selectedPlace?.id ? "selected_" : "";
-    final favoritePostfix =
-        _likedPlaceIds.contains(place.id) ? "_favorite" : "";
+    final isSelected = place.id == _selectedPlace?.id;
+    final isFavorite = _likedPlaceIds.contains(place.id);
 
-    final icon = await BitmapDescriptor.fromAssetImage(
-      const ImageConfiguration(),
-      "assets/icons/${selectedPrefix}map_place$favoritePostfix.png",
+    final icon = await _markerDrawer.createCustomMarkerBitmap(
+      title: place.name,
+      isLiked: isFavorite,
+      isSelected: isSelected,
+      scale: _scale,
+      showText: !isSelected,
     );
 
     setState(() {
@@ -72,7 +78,11 @@ class _CustomMapState extends State<CustomMap> {
         markerId: MarkerId(place.id),
         position: place.location,
         onTap: () => _selectPlace(place),
-        icon: icon,
+        icon: icon.marker,
+        anchor: Offset(
+          icon.anchorDx,
+          icon.anchorDy,
+        ),
       ));
     });
   }
@@ -109,8 +119,11 @@ class _CustomMapState extends State<CustomMap> {
   @override
   initState() {
     super.initState();
-    _likedPlaceIds.addAll([_places[0].id, _places[3].id]);
-    _mapPlacesToMarkers();
+    Future.delayed(Duration.zero, () {
+      _likedPlaceIds.addAll([_places[0].id, _places[3].id]);
+      _scale = MediaQuery.of(context).devicePixelRatio;
+      _mapPlacesToMarkers();
+    });
   }
 
   @override
