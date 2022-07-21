@@ -3,9 +3,12 @@ import 'package:flutter/material.dart';
 
 import '../datasource.dart';
 import 'card_info.dart';
+import 'like_button.dart';
 
 class MapPlaceCard extends StatelessWidget {
   final Place place;
+  final bool isLiked;
+  final VoidCallback likeTapHandler;
 
   static const double photoHeight = 132;
   static const double photoWidth = 109;
@@ -13,6 +16,8 @@ class MapPlaceCard extends StatelessWidget {
   const MapPlaceCard({
     Key? key,
     required this.place,
+    required this.isLiked,
+    required this.likeTapHandler,
   }) : super(key: key);
 
   @override
@@ -22,63 +27,76 @@ class MapPlaceCard extends StatelessWidget {
       shadowColor: Colors.black.withOpacity(0.24),
       borderRadius: BorderRadius.circular(12),
       elevation: 12,
-      child: Container(
-        height: photoHeight,
-        width: MediaQuery.of(context).size.width - 40,
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
-          color: Colors.white,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Container(
-              height: photoHeight,
-              width: photoWidth,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  bottomLeft: Radius.circular(12),
-                ),
-                image: DecorationImage(
-                  image: CachedNetworkImageProvider(place.photo),
-                  fit: BoxFit.cover,
-                ),
-              ),
+      child: Stack(
+        children: [
+          Container(
+            height: photoHeight,
+            width: MediaQuery.of(context).size.width - 40,
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+              color: Colors.white,
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxWidth:
-                          MediaQuery.of(context).size.width - photoWidth - 72,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Container(
+                  height: photoHeight,
+                  width: photoWidth,
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      bottomLeft: Radius.circular(12),
                     ),
-                    child: Text(
-                      place.name,
-                      style: _titleTextStyle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.start,
+                    image: DecorationImage(
+                      image: CachedNetworkImageProvider(place.photo),
+                      fit: BoxFit.cover,
                     ),
                   ),
-                  const SizedBox(
-                    height: 4,
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width -
+                              photoWidth -
+                              72,
+                        ),
+                        child: Text(
+                          place.name,
+                          style: _titleTextStyle,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 4,
+                      ),
+                      CardInfo(
+                        align: MainAxisAlignment.start,
+                        vibe: place.vibes.first,
+                        occasion: place.occasions.first,
+                        budget: place.budget.first,
+                        textStyle: _infoTextStyle,
+                      ),
+                    ],
                   ),
-                  CardInfo(
-                    align: MainAxisAlignment.start,
-                    vibe: place.vibes.first,
-                    occasion: place.occasions.first,
-                    budget: place.budget.first,
-                    textStyle: _infoTextStyle,
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          Positioned(
+            bottom: 12,
+            right: 12,
+            child: LikeButton(
+              isLiked: isLiked,
+              onTap: likeTapHandler,
+            ),
+          ),
+        ],
       ),
     );
   }
