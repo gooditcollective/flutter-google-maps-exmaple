@@ -1,6 +1,6 @@
 # flutter-google-maps-example
 
-Репозиторий к тюториалу "Маркеры на Google Maps во Flutter: от простого к сложному".
+Репозиторий к туториалу "Маркеры на Google Maps во Flutter: от простого к сложному".
 
 ## Ветка different-icons
 
